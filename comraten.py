@@ -12,10 +12,17 @@ root.geometry('600x400+50+50')
 spiel = ttk.Frame(root)
 spiel.pack(padx=10, pady=10, fill='x', expand=True)
 
-ratezahl_var = tk.StringVar()
-ratezahl_label = ttk.Label(spiel, text="Gib mir eine Zahl:")
-ratezahl_label.pack(fill='x', expand=True)
 
+def tippse(label, text, delay=100):
+    if text:
+        current_text = label.cget("text")
+        label.config(text=current_text + text[0])
+        label.after(delay, tippse, label, text[1:], delay)
+
+ratezahl_var = tk.StringVar()
+ratezahl_label = ttk.Label(spiel, text="")
+ratezahl_label.pack(fill='x', expand=True)
+tippse(ratezahl_label, "Gib mir eine Zahl", 100)
 ratezahl_entry = ttk.Entry(spiel, textvariable=ratezahl_var)
 ratezahl_entry.pack(fill='x', expand=True)
 ratezahl_entry.focus()
@@ -59,7 +66,9 @@ def weiter_spiel():
         zahlcom = neuezahlkleiner(zahlcom)
     großoklein = ""
     Zaehler += 1
-    result_label.config(text=f"Meine Zahl: {zahlcom}")
+    result_label.config(text="")
+    tippse(result_label, f"Meine Zahl: {zahlcom}", 100)
+    #result_label.config(text=f"Meine Zahl: {zahlcom}")
     ratezahl = int(ratezahl_var.get())
     if zahlcom == ratezahl:
         result3_label.config(text=f"Die Zahl ist: {zahlcom}")
@@ -131,8 +140,10 @@ def haupt():
         result_label.config(text="Keine Zahlen gefunden.")
         zahlcom = random.randint(1, 100)  # Wenn keine Zahl gefunden, nimm von 1 bis 100
 
-    result_label.config(text=f"Meine Ratezahl: {zahlcom}")
-    result2_label.config(text="Ist meine Zahl zu groß oder zu klein?")
+    #result_label.config(text=f"Meine Ratezahl: {zahlcom}")
+    tippse(result_label, f"Meine Ratezahl: {zahlcom}", 50)
+    #result2_label.config(text="Ist meine Zahl zu groß oder zu klein?")
+    tippse(result2_label, "Ist meine Zahl zu groß oder zu klein?", 100)
     zugross_button.pack(fill='x', expand=True)
     zuklein_button.pack(fill='x', expand=True)
 
