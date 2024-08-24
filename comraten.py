@@ -71,6 +71,7 @@ def weiter_spiel():
     else:
         result2_label.config(text="Ist meine Zahl zu groß oder zu klein?")
 
+#Funktion start_game um alles wieder zurückzusetzen und ein leeres GUI zu haben und dann an haupt() weitergeben
 def start_game():
     global zahlcom, Zaehler, arrg, arrk
     print("Starte neues Spiel...")  # Debugging 
@@ -93,6 +94,7 @@ def start_game():
 def haupt():
     global zahlcom, Zaehler
     Zaehler = 0
+    #Prüfen auf ganze Zahl
     try:
         ratezahl = int(ratezahl_var.get())
         if not (1 <= ratezahl <= 100):
@@ -100,7 +102,7 @@ def haupt():
             return
     except ValueError:
         result_label.config(text="Das ist keine gültige Zahl.")
-        print("ValueError: Invalid input detected")  # Debugging 
+        print("ValueError: Kein gültiger Input")  # Debugging 
         return
     # Datei daten.txt einlesen und die zahl mit der höchsten wahrscheinlichkeit auslesen
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -119,6 +121,7 @@ def haupt():
             except (IndexError, ValueError):
                 continue
     
+    #Zahlen aus array numbers mithilfe von Counter einlesen zählen und nur die wahrscheinlichste Zahl in zahlcom speichern
     #!!!Problem noch: Wenn eine Zahl oft vorkommt wird keine andere mehr genommen. 
     if numbers:
         counter = Counter(numbers)
@@ -133,6 +136,7 @@ def haupt():
     zugross_button.pack(fill='x', expand=True)
     zuklein_button.pack(fill='x', expand=True)
 
+#Funktion um die Daten aus den arrays und der Variable in daten.txt zu speichern
 def arrsintxt(arrg, arrk, ratezahl):
     # Wo liegt das programm
     script_dir = os.path.dirname(os.path.abspath(__file__))
