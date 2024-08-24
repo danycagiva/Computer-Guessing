@@ -37,7 +37,7 @@ def neuezahl(zahlcom):
     if arrk:
         untere_grenze = max(arrk)
     else:
-        untere_grenze = 1
+        untere_grenze = 0
     obere_grenze = min(arrg)
     zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
     return zahlcom
@@ -47,7 +47,7 @@ def neuezahlkleiner(zahlcom):
     if arrg:
         obere_grenze = min(arrg)
     else:
-        obere_grenze = 100
+        obere_grenze = 101
     untere_grenze = max(arrk)
     zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
     return zahlcom
