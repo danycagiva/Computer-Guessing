@@ -134,8 +134,10 @@ def haupt():
     #!!!Problem noch: Wenn eine Zahl oft vorkommt wird keine andere mehr genommen. 
     if numbers:
         counter = Counter(numbers)
-        most_probable_number = counter.most_common(1)[0][0]
-        zahlcom = most_probable_number  # nimm die häufigste Zahl als zahlcom
+        most_probable_number = counter.most_common(10)
+        #print(most_probable_number) #Debugging Line
+        zahlcom2 = random.choice(most_probable_number)  # nimm das häufigste array als zahlcom2
+        zahlcom = zahlcom2[0] #nimm position0 als neue Zahl
     else:
         result_label.config(text="Keine Zahlen gefunden.")
         zahlcom = random.randint(1, 100)  # Wenn keine Zahl gefunden, nimm von 1 bis 100
