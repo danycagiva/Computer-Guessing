@@ -129,6 +129,31 @@ def haupt():
                 numbers.append(wahrscheinlichkeit)
             except (IndexError, ValueError):
                 continue
+
+    ###inkludieren von linearer regression und training der datenmodelle
+    import numpy as np
+
+    # Erstelle das Dataset nur als beispiel - später die daten aus der csv laden
+    zahl_werte = np.random.randint(1, 100, size=(1000))  # 1000 Zahlen zwischen 1 und 100
+    mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
+    variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
+
+    X = np.array([[mittel_wert, variabilität] for _ in range(1000)])  # Matrix von Eigenschaften
+    y = zahl_werte  # Vektor von Zahlen
+
+    # Lade das Dataset und trainiere ein k-NN-Modell
+    from sklearn.neighbors import KNeighborsRegressor
+    knn = KNeighborsRegressor(n_neighbors=5)#erzeugen mit 5 nachbarn
+    knn.fit(X, y)
+
+    def vorhersage(eigenschaften):
+        return knn.predict(np.array([eigenschaften]))
+
+    # Eigenschaften der Zahl, die du erraten möchtest (z.B. mittlerer Wert, Variabilität, usw.)
+    eigenschaften = [40, 10]  # Mittlerer Wert und Variabilität
+    vorhersagte_zahl = vorhersage(eigenschaften)
+    print(vorhersagte_zahl[0])
+
     
     #Zahlen aus array numbers mithilfe von Counter einlesen zählen und nur die wahrscheinlichste Zahl in zahlcom speichern
     #!!!Problem noch: Wenn eine Zahl oft vorkommt wird keine andere mehr genommen. 
