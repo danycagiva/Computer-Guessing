@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import *
 from tkinter.messagebox import showinfo
 from collections import Counter
+import numpy as np
 
 root = tk.Tk()
 root.title('Zahlen raten')
@@ -33,24 +34,88 @@ arrk = []
 
 # Funktionen für die Algos
 def neuezahl(zahlcom):
+    global filtered
     arrg.append(zahlcom)
     if arrk:
         untere_grenze = max(arrk)
     else:
         untere_grenze = 0
     obere_grenze = min(arrg)
-    zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
+
+
+    #strip alle zahlen die größer sind als min(arrg) aus dem dataset
+    filtered = filter(lambda num: num < min(arrg), filtered)
+    filtered=list(filtered)
+    print(filtered)#Debugging Line
+    # Dataset in zahlwerte laden
+    zahl_werte = filtered  
+    mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
+    variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
+
+    X = np.array([[mittel_wert, variabilität] for _ in range(len(filtered))])  # Matrix von Eigenschaften
+    y = zahl_werte  # Vektor von Zahlen
+
+    # Lade das Dataset und trainiere ein k-NN-Modell
+    from sklearn.neighbors import KNeighborsRegressor
+    knn = KNeighborsRegressor(n_neighbors=5)#erzeugen mit 5 nachbarn
+    knn.fit(X, y)
+
+    def vorhersage(eigenschaften):
+            return knn.predict(np.array([eigenschaften]))
+
+    # Eigenschaften der Zahl
+    eigenschaften = [mittel_wert, variabilität]  # Mittlerer Wert und Variabilität
+    vorhersagte_zahl = vorhersage(eigenschaften)
+    zahlcom=int(vorhersagte_zahl[0])
+    print(vorhersagte_zahl) #Debug-Line
+
+
+    #zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
     return zahlcom
+    #abfangen Wenn range zahl1-1=zahl1 return valueerror and generate new range between array-1 and array+1
 
 def neuezahlkleiner(zahlcom):
+    global filtered
     arrk.append(zahlcom)
+    #strip alle zahlen die kleiner sind alle max(arrk) aus dem dataset
+
     if arrg:
         obere_grenze = min(arrg)
+    #elif max(arrg) > max(arrk-1):
+    #    obere_grenze = 101  
     else:
         obere_grenze = 101
+
+
     untere_grenze = max(arrk)
-    zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
+    filtered = filter(lambda num: num > max(arrk), filtered)
+    filtered=list(filtered)
+    print(filtered)
+    # Dataset in zahlwerte laden
+    zahl_werte = filtered  
+    mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
+    variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
+
+    X = np.array([[mittel_wert, variabilität] for _ in range(len(filtered))])  # Matrix von Eigenschaften
+    y = zahl_werte  # Vektor von Zahlen
+
+    # Lade das Dataset und trainiere ein k-NN-Modell
+    from sklearn.neighbors import KNeighborsRegressor
+    knn = KNeighborsRegressor(n_neighbors=5)#erzeugen mit 5 nachbarn
+    knn.fit(X, y)
+
+    def vorhersage(eigenschaften):
+            return knn.predict(np.array([eigenschaften]))
+
+    # Eigenschaften der Zahl
+    eigenschaften = [mittel_wert, variabilität]  # Mittlerer Wert und Variabilität
+    vorhersagte_zahl = vorhersage(eigenschaften)
+    zahlcom=int(vorhersagte_zahl[0])
+    print(vorhersagte_zahl) #Debug-Line
+    #zahlcom = random.randint(untere_grenze + 1, obere_grenze - 1)
     return zahlcom
+    #abfangen Wenn range zahl1-1=zahl2+2 return valueerror and generate new range between array-1 and array+1
+
 
 # Welcher Button wurde geklickt und Übergabe an Funktion weiter_spiel
 def which_button(t):
@@ -97,11 +162,11 @@ def start_game():
     zuklein_button.pack_forget()
     ja_button.pack_forget()
     nein_button.pack_forget()
-    ratezahl_entry.delete(0, 'end')
+    ratezahl_entry.delete(0)
     haupt()
 
 def haupt():
-    global zahlcom, Zaehler
+    global zahlcom, Zaehler, filtered
     Zaehler = 0
     #Prüfen auf ganze Zahl
     try:
@@ -113,6 +178,7 @@ def haupt():
         result_label.config(text="Das ist keine gültige Zahl.")
         print("ValueError: Kein gültiger Input")  # Debugging 
         return
+    result_label.config(text="")
     # Datei daten.txt einlesen und die zahl mit der höchsten wahrscheinlichkeit auslesen
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, 'daten.txt')
@@ -127,45 +193,64 @@ def haupt():
                 numbers.append(ratezahl)
                 numbers.append(zahl)
                 numbers.append(wahrscheinlichkeit)
+                #print(numbers)
             except (IndexError, ValueError):
                 continue
-
-    ###inkludieren von linearer regression und training der datenmodelle
-    import numpy as np
-
-    # Erstelle das Dataset nur als beispiel - später die daten aus der csv laden
-    zahl_werte = np.random.randint(1, 100, size=(1000))  # 1000 Zahlen zwischen 1 und 100
-    mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
-    variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
-
-    X = np.array([[mittel_wert, variabilität] for _ in range(1000)])  # Matrix von Eigenschaften
-    y = zahl_werte  # Vektor von Zahlen
-
-    # Lade das Dataset und trainiere ein k-NN-Modell
-    from sklearn.neighbors import KNeighborsRegressor
-    knn = KNeighborsRegressor(n_neighbors=5)#erzeugen mit 5 nachbarn
-    knn.fit(X, y)
-
-    def vorhersage(eigenschaften):
-        return knn.predict(np.array([eigenschaften]))
-
-    # Eigenschaften der Zahl, die du erraten möchtest (z.B. mittlerer Wert, Variabilität, usw.)
-    eigenschaften = [40, 10]  # Mittlerer Wert und Variabilität
-    vorhersagte_zahl = vorhersage(eigenschaften)
-    print(vorhersagte_zahl[0])
-
-    
+    filtered=numbers
     #Zahlen aus array numbers mithilfe von Counter einlesen zählen und nur die wahrscheinlichste Zahl in zahlcom speichern
-    #!!!Problem noch: Wenn eine Zahl oft vorkommt wird keine andere mehr genommen. 
     if numbers:
-        counter = Counter(numbers)
-        most_probable_number = counter.most_common(10)
+        #counter = Counter(numbers)
+        #get 10 numbers and count probability with most.common out of array numbers and return new number
+        #most_probable_number = counter.most_common(10)
         #print(most_probable_number) #Debugging Line
-        zahlcom2 = random.choice(most_probable_number)  # nimm das häufigste array als zahlcom2
-        zahlcom = zahlcom2[0] #nimm position0 als neue Zahl
+        #zahlcom2 = random.choice(most_probable_number)  # nimm die häufigste array-Zahl als zahlcom2
+        #zahlcom = zahlcom2[0] #nimm position0 als neue Zahl
+        
+        # Dataset in zahlwerte laden
+        zahl_werte = numbers  
+        mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2 #(np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
+        variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
+
+        X = np.array([[mittel_wert, variabilität] for _ in range(len(zahl_werte))])  # Matrix von Eigenschaften
+        y = zahl_werte  # Vektor von Zahlen
+
+        # Lade das Dataset und trainiere ein k-NN-Modell
+        from sklearn.neighbors import KNeighborsRegressor
+        knn = KNeighborsRegressor(n_neighbors=10)#erzeugen mit 5 nachbarn
+        knn.fit(X, y)
+
+        def vorhersage(eigenschaften):
+            return knn.predict(np.array([eigenschaften]))
+
+        # Eigenschaften der Zahl
+        eigenschaften = [mittel_wert, variabilität]  # Mittlerer Wert und Variabilität
+        vorhersagte_zahl = vorhersage(eigenschaften)
+        zahlcom=int(vorhersagte_zahl[0])
+        print(vorhersagte_zahl) #Debug-Line
     else:
         result_label.config(text="Keine Zahlen gefunden.")
-        zahlcom = random.randint(1, 100)  # Wenn keine Zahl gefunden, nimm von 1 bis 100
+        # Erstelle das Dataset von 1-100 wenn nichts funktioniert//als fallback
+        zahl_werte = np.random.randint(1, 100, size=(1000))  # 1000 Zahlen zwischen 1 und 100
+        mittel_wert = (np.max(zahl_werte) + np.min(zahl_werte)) / 2  # Mittlerer Wert der Zahlen der auch in die csv muss
+        variabilität = np.std(zahl_werte)  # Variabilität der Zahlen - muss auch in csv
+
+        X = np.array([[mittel_wert, variabilität] for _ in range(1000)])  # Matrix von Eigenschaften
+        y = zahl_werte  # Vektor von Zahlen
+
+        # Lade das Dataset und trainiere ein k-NN-Modell
+        from sklearn.neighbors import KNeighborsRegressor
+        knn = KNeighborsRegressor(n_neighbors=5)#erzeugen mit 5 nachbarn
+        knn.fit(X, y)
+
+        def vorhersage(eigenschaften):
+            return knn.predict(np.array([eigenschaften]))
+
+        # Eigenschaften der Zahl, die du erraten möchtest (z.B. mittlerer Wert, Variabilität, usw.)
+        eigenschaften = [mittel_wert, variabilität]  # Mittlerer Wert und Variabilität
+        vorhersagte_zahl = vorhersage(eigenschaften)
+        zahlcom = vorhersagte_zahl[0]
+
+    
 
     #result_label.config(text=f"Meine Ratezahl: {zahlcom}")
     tippse(result_label, f"Meine Ratezahl: {zahlcom}", 50)
